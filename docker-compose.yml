@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  base:
+    image: tigervnc-base:latest
+    build:
+      context: .
+      dockerfile: dockerfiles/base.Dockerfile
+
+  tigervnc:
+    image: drengskapur/tigervnc:latest
+    build:
+      context: .
+      dockerfile: dockerfiles/tigervnc.Dockerfile
+      args:
+        - BASE_IMAGE=tigervnc-base:latest
+    depends_on:
+      - base
+    ports:
+      - "5901:5901"  # VNC port
+      - "6080:6080"  # noVNC web interface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6080", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s 
